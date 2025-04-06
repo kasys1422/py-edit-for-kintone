@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/kintone/js-sdk/%40kintone/plugin-manifest-validator%4010.2.0/packages/plugin-manifest-validator/manifest-schema.json",
+  "manifest_version": 1,
+  "version": "0.0.1",
+  "type": "APP",
+  "desktop": {
+  },
+  "icon": "image/icon.png",
+  "config": {
+    "html": "html/config.html",
+    "js": [
+      "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js",
+      "https://js.cybozu.com/jquery/1.11.3/jquery.min.js",
+      "js/service.js",
+      "js/config.js"
+    ],
+    "css": [
+      "css/51-modern-default.css",
+      "css/config.css"
+    ],
+    "required_params": []
+  },
+  "name": {
+    "en": "PyEdit for kintone",
+    "ja": "PyEdit for kintone",
+    "zh": "PyEdit for kintone",
+    "es": "PyEdit for kintone"
+  },
+  "description": {
+    "en": "This plugin allows you to customize kintone using Python from your browser.",
+    "ja": "kintoneのカスタマイズをブラウザからPythonを使用して行うことができるプラグインです。",
+    "zh": "This plugin allows you to customize kintone using Python from your browser.",
+    "es": "Este plugin permite personalizar kintone utilizando Python desde un navegador."
+  }
+}

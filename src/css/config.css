@@ -1,0 +1,220 @@
+/* 画面全体をラップするコンテナ */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+}
+
+/* ナビゲーションバー */
+.navbar {
+  display: flex;
+  align-items: center;
+  background-color: #2c3e50;
+  padding: 0 16px;
+  height: 50px;
+}
+
+.dropdown {
+  position: relative;
+  margin-right: 20px;
+}
+
+.dropdown>button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  min-width: 200px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+}
+
+.dropdown-content div {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  display: block;
+  color: #333;
+  text-decoration: none;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.dropdown-content div:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* エディタ領域（画面の残りスペースにフィット） */
+.editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e1e1e;
+  border-top: 1px solid #444;
+  border-bottom: 1px solid #444;
+}
+
+.editor-header {
+  background-color: #2d2d30;
+  padding: 8px 16px;
+  border-bottom: 1px solid #444;
+}
+
+.editor-header span {
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Monaco Editorを配置する領域 */
+#editor {
+  flex: 1;
+}
+
+/* フッター */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #2c3e50;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.save-btn {
+  background-color: #2ecc71;
+  color: #fff;
+}
+
+.save-btn:hover {
+  background-color: #27ae60;
+}
+
+.discard-btn {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.discard-btn:hover {
+  background-color: #c0392b;
+}
+
+.return-btn {
+  background-color: #7f8c8d;
+  color: #fff;
+}
+
+.return-btn:hover {
+  background-color: #95a5a6;
+}
+
+.footer-left label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+/* Info Icon */
+.footer-right {
+  position: relative;
+}
+
+.info-icon {
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+}
+
+.info-popup {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 30px;
+  background-color: #fff;
+  color: #333;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 1000;
+}
+
+.info-popup a {
+  color: #007acc;
+  text-decoration: none;
+}
+
+.info-popup a:hover {
+  text-decoration: underline;
+}
+
+.footer-right:hover .info-popup {
+  display: block;
+}
+
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  /* 半透明の黒 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#loading-screen.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 6px solid #ccc;
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
