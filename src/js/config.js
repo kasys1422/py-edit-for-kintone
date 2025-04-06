@@ -70,6 +70,15 @@
       }
     );
 
+    // Ctrl + W or Cmd + W のショートカットを誤動作防止のために無効化
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyW,
+      function () {
+        console.log('Ctrl+W pressed');
+        // 何もしない
+      }
+    );
+
     loadScreen();
 
     // 内容変更時にフラグを更新
@@ -178,7 +187,7 @@ if (!document.querySelector(\`script[src="\${PY_SCRIPT_JS_URL}"]\`)) {
     // システム用の簡易ライブラリコード（例としてalertとconsole.logを利用）
     const systemCode = \`
 
-from js import alert, window, kintone, Object, kintoneRecordGet, kintoneRecordSet, console
+from js import alert, window, kintone, Object, kintoneRecordGet, kintoneRecordSet, console, undefined
 
 def print(*args, sep=" ", end="\\\\n", start="", level="info", color=None):
   """
