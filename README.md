@@ -26,7 +26,7 @@
 
 ## ドキュメント
 
-[独自実装APIのドキュメント](#api_document_ja.md)
+[独自実装APIのドキュメント](./api_document_ja.md)
 
 ## 使用できる Python API 例
 
