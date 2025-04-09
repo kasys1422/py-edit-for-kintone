@@ -20,21 +20,20 @@
 
 **シグネチャ:**
 ```python
-def print(*args, sep=" ", end="", start="", level="info", color=None):
+def print(*args, end="", start="", level="info", color=None):
 ```
 
 **概要:**
 - 複数の引数を受け取り、JavaScript の `console` オブジェクトを使用してログレベルに応じた出力を行うカスタム関数です。
 - 指定されたログレベルに基づき、`console.log`、`console.warn`、`console.error`、または `console.debug` を呼び出します。
-- `color` パラメータが指定された場合、CSS のスタイル（例: `"red"`, `"#ff0000"`) を適用して色付きで出力します。
-- 引数が一つで、デフォルト状態（`level="info"`、`color=None`、`start` および `end` が空文字）の場合は、直接 `console.log` を呼び出して最適化された出力を行います。
+- `color` パラメータが指定された場合、CSS のスタイル（例: `"red"`, `"#ff0000"`) を適用して色付きで出力します。セパレータはこの場合のみ有効です。また、levelが無視されます。
 
 **パラメータ:**
 - `*args`: 出力する複数の値。
-- `sep` (str): 各引数間に挿入する区切り文字（デフォルトは半角スペース）。
+- `sep` (str): 各引数間に挿入する区切り文字（デフォルトは半角スペース）。colorを指定した場合のみ有効。
 - `end` (str): 出力の末尾に付加する文字（デフォルトは空文字または環境により改行）。
 - `start` (str): 出力の先頭に付加する文字列。
-- `level` (str): ログレベル。使用可能な値は `"info"`, `"warn"`, `"error"`, `"debug"` 。
+- `level` (str): ログレベル。使用可能な値は `"info"`, `"warn"`, `"error"`, `"debug"` 。colorを指定した場合は無視されます。
 - `color` (str or None): CSS で利用可能な色の文字列。指定されると、該当色でスタイル付き出力を行います。
 
 **使用例:**
@@ -201,11 +200,7 @@ api_caller.call()
 ```python
 def __init__(self, event=None)
 ```
-- `event`: kintone のイベントオブジェクト（辞書形式）。指定がない場合、独自に `kintoneRecordGet()` を利用してレコードを取得します。
-
-**主なメソッド:**
-- `__enter__(self)`: コンテキストに入った際にレコードを取得して返します。イベントが指定されていない場合、`kintoneRecordGet()` を利用してレコードを取得後、その `"record"` キーの値を返します。
-- `__exit__(self, exc_type, exc_value, traceback)`: コンテキストを抜ける際に、例外が無い場合は取得したレコードを `kintoneRecordSet()` を用いて更新します。イベントが指定されている場合は何も行いません。
+- `event`: kintone のイベントオブジェクト（辞書形式）。指定がない場合、独自にレコードを取得します。
 
 **使用例:**
 ```python
