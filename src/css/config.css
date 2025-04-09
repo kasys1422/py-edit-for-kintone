@@ -204,6 +204,58 @@
   opacity: 1;
 }
 
+.edit-pyconfig-btn {
+  background-color: #2196F3; /* 青 */
+  color: white;
+}
+
+/* py-configエディタ */
+.py-config-editor-container {
+  /* position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%; */
+  background-color: #333;
+  padding: 0px;
+  display: none; /* 初期は非表示 */
+}
+
+.py-config-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.py-config-editor-header span {
+  font-size: 16px;
+  color: #fff;
+}
+
+.py-config-editor-header button {
+  background-color: #666;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 5px 10px;
+}
+
+.py-config-textarea {
+  width: 100%;
+  height: 200px;
+  background-color: #2d2d2d;
+  color: #fff;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: "Consolas", monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  border-radius: 4px;
+  padding: 10px;
+}
+
 .spinner {
   width: 50px;
   height: 50px;

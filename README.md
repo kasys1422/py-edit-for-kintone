@@ -24,6 +24,10 @@
 4. 保存して、Kintoneの画面をリロード
 5. イベントに応じてPythonコードが実行される
 
+## ドキュメント
+
+[独自実装APIのドキュメント](./api_document_ja.md)
+
 ## 使用できる Python API 例
 
 ### 🔹 `@kintone_event(...)`
