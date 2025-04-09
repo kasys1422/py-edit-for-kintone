@@ -5,6 +5,7 @@
   const pythonMobileFile = "PyEditCustomizeMobile.js";
 
   let nowPlatform = "PC";
+  let pythonType = "mpy";
 
   // 初期内容を保持
   let initialContent = "";
@@ -46,6 +47,24 @@
     const regex = /const\s+userCode\s*=\s*`([\s\S]*?)`;/;
     const match = codeString.match(regex);
     return match ? match[1] : null;
+  }
+
+  function extractJsonString(codeText) {
+    // 正規表現で pyConfig.innerHTML = "..." の中の { } を含む文字列をキャプチャ
+    const regex = /pyConfig\.innerHTML\s*=\s*"(\{[^"]+\})"/;
+    const match = codeText.match(regex);
+    return match ? match[1] : null;
+  }
+
+  function checkScriptType(text) {
+    // タグの有無を判定
+    if (text.includes('const pyScript = document.createElement("py-script");')) {
+      return 'py';
+    } else if (text.includes('const pyScript = document.createElement("mpy-script");')) {
+      return 'mpy';
+    } else {
+      return 'mpy';
+    }
   }
 
   let editor = null;
@@ -94,6 +113,17 @@
     console.log('save');
     // Save the content
 
+    let configCode = document.getElementById('py-config-textarea').value;
+    // JSONとしてパース
+    try {
+      // JSONを1行の文字列に変換
+      configCode = JSON.stringify(JSON.parse(configCode));
+    } catch (e) {
+      alert('py-configの内容が不正です。');
+      hideLoading();
+      return;
+    }
+
     let userCode = editor.getValue();
 
     // // \nを\\nに変換
@@ -120,12 +150,18 @@ function kintoneRecordGet() {
   }
 }
 
-function kintoneRecordSet(record) {
+function kintoneRecordSet(record, isPyodide = false) {
   // 現在のURLを取得
   const url = window.location.href;
   // URLに '/m/' が含まれていればモバイルと判定
   const isMobile = url.indexOf('/m/') !== -1;
-  
+  // console.log('record:', record);
+  if (isPyodide) {
+    // Pyodide環境での処理
+    record = pyodide.ffi.to_js(record);
+    console.log('record:', record);
+  }
+  // モバイルとPCでの処理を分ける
   if (isMobile) {
     return kintone.mobile.app.record.set(record);
   } else {
@@ -181,15 +217,32 @@ if (!document.querySelector(\`script[src="\${PY_SCRIPT_JS_URL}"]\`)) {
 
   // PyScriptのJSファイルが正常にロードされたら、Pythonコードを実行するためのタグを作成
   script.onload = function() {
-    // カスタムタグ <mpy-script> を作成（MicroPython版PyScript用）
-    const pyScript = document.createElement("mpy-script");
+  
+    // カスタムタグ(py-config)を作成
+    const pyConfig = document.createElement("py-config");
+    pyConfig.innerHTML = "${configCode}";
+    // 作成したタグをdocument.bodyに追加して実行
+    document.head.appendChild(pyConfig);
+
+    // カスタムタグを作成
+    const pyScript = document.createElement("${pythonType}-script");
 
     // システム用の簡易ライブラリコード（例としてalertとconsole.logを利用）
     const systemCode = \`
 
 from js import alert, window, kintone, Object, kintoneRecordGet, kintoneRecordSet, console, undefined
 
-def print(*args, sep=" ", end="\\\\n", start="", level="info", color=None):
+try:
+    import pyodide
+    IS_PYODIDE = True
+    IS_MICROPYTHON = False
+    console.log("[pyscript/main] current environment is Pyodide")
+except ImportError:
+    IS_PYODIDE = False
+    IS_MICROPYTHON = True
+    console.log("[pyscript/main] current environment is MicroPython")
+
+def print(*args, sep=" ", end="", start="", level="info", color=None):
   """
   複数引数を受け取り、ログレベルに応じた出力を行うカスタム print 関数です。
   直接色を指定する場合は、color パラメータに CSS で利用可能な色（例："red", "#ff0000"）を指定してください。
@@ -205,16 +258,22 @@ def print(*args, sep=" ", end="\\\\n", start="", level="info", color=None):
   from js import console
 
   # 引数が一つだけの場合は、console.log を優先して使用
-  if len(args) == 1 and level == "info" and color is None and start == "" and end == "\\\\n":
+  if len(args) == 1 and level == "info" and color is None and start == "" and end == "":
       console.log(args[0])
       return
-
-  # 可変長引数を連結して最終的なメッセージ文字列を生成
-  message = start + sep.join([str(arg) for arg in args]) + end
+  
+  if start != "" and end != "":
+    args = [start] + list(args) + [end]
+  elif start != "":
+    args = [start] + list(args)
+  elif end != "":
+    args = list(args) + [end]
 
   # 直接色指定がある場合は、その色でスタイル付き出力を実施
   if color is not None:
       style = f"color: {color};"
+      # 可変長引数を連結して最終的なメッセージ文字列を生成
+      message = start + sep.join([str(arg) for arg in args]) + end
       console.log("%c" + message, style)
   else:
       # 色指定がない場合は、ログレベルに応じた出力関数を選択
@@ -225,10 +284,10 @@ def print(*args, sep=" ", end="\\\\n", start="", level="info", color=None):
           "debug": console.debug,
       }
       log_func = levels.get(level, console.log)
-      log_func(message)
+      log_func(*args)
 
 def get_kintone_screen_info():
-    url = window.location.href
+    url = str(window.location.href)
     # モバイル判定: URL に "/m/" が含まれていればモバイルとする
     is_mobile = "/m/" in url
 
@@ -299,8 +358,10 @@ def kintone_event(event_names):
     def decorator(func):
         def wrapper(event):
             try:
-                return func(event)
-                #return func()
+                if IS_PYODIDE:
+                    return pyodide.ffi.to_js(func(event.as_py_json()))
+                else:
+                    return func(event)
             except Exception as e:
                 print(f"[Error] in {func.__name__}: {e}", level="error")
                 return event
@@ -312,6 +373,9 @@ def kintone_event(event_names):
             for ev in event_names:
                 if ev == screen_type:
                     record = kintoneRecordGet()
+                    if IS_PYODIDE:
+                        record = record.as_py_json()
+                    
                     dummy_record = {
                         "appId": app_id,
                         "recordId": record_id,
@@ -320,12 +384,14 @@ def kintone_event(event_names):
                     }
                     event_result = wrapper(dummy_record)
                     if event_result is not None:
-                        kintoneRecordSet({"record":event_result["record"]})
+                        kintoneRecordSet({"record":event_result["record"]}, IS_PYODIDE)
                 else:
                     kintone.events.on(ev, wrapper)
         else:
             if event_names == screen_type:
                 record = kintoneRecordGet()
+                if IS_PYODIDE:
+                    record = record.as_py_json()
                 dummy_record = {
                     "appId": app_id,
                     "recordId": record_id,
@@ -334,11 +400,39 @@ def kintone_event(event_names):
                 }
                 event_result = wrapper(dummy_record)
                 if event_result is not None:
-                    kintoneRecordSet({"record":event_result["record"]})
+                    kintoneRecordSet({"record":event_result["record"]}, IS_PYODIDE)
             else:
                 kintone.events.on(event_names, wrapper)
         return wrapper
     return decorator
+
+class handle_promise:
+    def __init__(self, promise_object, successCallback=None, failureCallback=None):
+        self.promise_object = promise_object
+        self.successCallback = successCallback
+        self.failureCallback = failureCallback
+
+    def __call__(self, func):
+        self.successCallback = func
+        self.call()
+        return func
+
+    def on_success(self, func):
+        self.successCallback = func
+        return func
+
+    def on_error(self, func):
+        self.failureCallback = func
+        return func
+
+    def call(self):
+        if self.successCallback is None:
+            raise ValueError("Success callback is not defined")
+        if self.failureCallback is None:
+            self.promise_object.then(self.successCallback)
+        else:
+            self.promise_object.then(self.successCallback).catch(self.failureCallback)
+
 
 class kintone_api:
     def __init__(self, api_endpoint: str, method: str, params: dict, 
@@ -399,6 +493,8 @@ class kintone_record:
             try:
                 # レコードを取得
                 self.record = kintoneRecordGet()
+                if IS_PYODIDE:
+                    self.record = record.as_py_json()
             except Exception as e:
                 print("kintoneRecordGet():", e, level="error")
                 raise
@@ -419,7 +515,7 @@ class kintone_record:
         if self.event is None:
             if exc_type is None:
                 try:
-                    kintoneRecordSet(self.record)
+                    kintoneRecordSet(self.record, IS_PYODIDE)
                 except Exception as e:
                     print("kintoneRecordSet():", e, level="error")
             else:
@@ -435,14 +531,42 @@ def on_event(element, event_type="click"):
     """
     def decorator(func):
         def wrapper(evt):
-            try:
-                func(evt)
-            except Exception as e:
-                print(f"[Error] in {func.__name__}: {e}", level="error")
+            func(evt)
+            #try:
+            #    func(evt)
+            #except Exception as e:
+            #    print(f"[Error] in {func.__name__}: {e}", level="error")
         element.addEventListener(event_type, wrapper)
         return func
     return decorator
 
+class handle_promise:
+    def __init__(self, promise_object,
+                 successCallback=None, failureCallback=None):
+        self.promise_object = promise_object
+        self.successCallback = successCallback
+        self.failureCallback = failureCallback
+
+    def __call__(self, func):
+        self.successCallback = func
+        self.call()
+        return func
+
+    def on_success(self, func):
+        self.successCallback = func
+        return func
+
+    def on_error(self, func):
+        self.failureCallback = func
+        return func
+
+    def call(self):
+        if self.successCallback is None:
+            raise ValueError("Success callback is not defined")
+        if self.failureCallback is None:
+            self.promise_object.then(self.successCallback)
+        else:
+            self.promise_object.then(self.successCallback).catch(self.failureCallback)
 \`;
 
     // ユーザーが記述するPythonコード
@@ -454,7 +578,7 @@ def on_event(element, event_type="click"):
     // システムコードとユーザーコードを結合して、<mpy-script>タグ内に設定
     pyScript.innerHTML = systemCode + "\\n" + userCode;
 
-    // 作成した<mpy-script>タグをdocument.bodyに追加して実行
+    // 作成したタグをdocument.bodyに追加して実行
     document.body.appendChild(pyScript);
   };
 
@@ -472,7 +596,7 @@ def on_event(element, event_type="click"):
     //   return;
     // }
 
-    
+
     let fileName = nowPlatform === "PC" ? pythonPcFile : pythonMobileFile;
 
     window.jsEditKintonePlugin.upsertJsFile(fileName, pythonCode, nowPlatform)
@@ -509,6 +633,9 @@ def on_event(element, event_type="click"):
     let pcPythonFile = document.getElementById('pc-python-file');
     let mobilePythonFile = document.getElementById('mobile-python-file');
     let nowFileType = document.getElementById('now-file-type');
+    let nowPythonType = document.getElementById('now-python-type');
+    let typeMicropython = document.getElementById('micropython');
+    let typePiodide = document.getElementById('pyodide');
 
     let fileName = nowPlatform === "PC" ? pythonPcFile : pythonMobileFile;
 
@@ -517,6 +644,21 @@ def on_event(element, event_type="click"):
       if (data.exists) {
         console.log('File exists');
         let userCode = extractUserCode(data.content);
+        pythonType = checkScriptType(data.content);
+        console.log('pythonType:', pythonType);
+        nowPythonType.innerHTML = pythonType === "py" ? "Pyodide" : "MicroPython";
+        let pyConfigString = extractJsonString(data.content);
+        console.log('pyConfigString:', pyConfigString);
+        if (pyConfigString) {
+          console.log('pyConfigString found:', pyConfigString);
+          document.getElementById('py-config-textarea').value = pyConfigString;
+        }
+        else {
+          console.log('pyConfigString not found');
+          // alert('py-configの内容が不正です。');
+          document.getElementById('py-config-textarea').value = "{}";
+        }
+
         // \\nを\nに変換
         userCode = userCode.replace(/\\\\n/g, '\\n');
         // \\rを\rに変換
@@ -534,7 +676,9 @@ def on_event(element, event_type="click"):
         }
         else {
           console.log('userCode not found');
-          alert('コード内の形式が不正です。コードをダウンロードして確認してください。上書き保存した場合は既存のデータは消去されます。');
+          if (data.content !== "") {
+            alert('コード内の形式が不正です。コードをダウンロードして確認してください。上書き保存した場合は既存のデータは消去されます。');
+          }
           editor.setValue(`
 def say_hello(name):
     print("Hello, " + name)
@@ -609,6 +753,30 @@ say_hello("World")
       loadScreen(nowPlatform);
       initialContent = editor.getValue();
       updateModifiedFlag();
+    });
+
+    // Python Type
+    typeMicropython.addEventListener('click', function () {
+      console.log('typeMicropython');
+      nowPythonType.innerHTML = "MicroPython";
+      pythonType = "mpy";
+    }
+    );
+    typePiodide.addEventListener('click', function () {
+      console.log('typePiodide');
+      nowPythonType.innerHTML = "Pyodide";
+      pythonType = "py";
+    }
+    );
+
+    // 「py-configを編集」ボタンのクリックでエディタ表示
+    document.getElementById('edit-py-config-btn').addEventListener('click', function () {
+      document.getElementById('py-config-editor').style.display = 'block';
+    });
+
+    // 「閉じる」ボタンのクリックでエディタ非表示
+    document.getElementById('close-py-config-btn').addEventListener('click', function () {
+      document.getElementById('py-config-editor').style.display = 'none';
     });
 
     // Hide loading screen

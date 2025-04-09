@@ -13,6 +13,13 @@
           <div id="mobile-python-file">モバイル用Pythonファイル</div>
         </div>
       </div>
+      <div class="dropdown" style="display: none;">
+        <button id="now-python-type">MicroPython</button>
+        <div class="dropdown-content">
+          <div id="micropython">MicroPython</div>
+          <div id="pyodide">Pyodide<br>(β version, unstable)</div>
+        </div>
+      </div>
     </div>
     <!-- エディタ領域 -->
     <div class="editor-container">
@@ -21,12 +28,25 @@
       </div> -->
       <div id="editor"></div>
     </div>
+    <!-- py-configエディタ領域（初期は非表示） -->
+    <div class="py-config-editor-container" id="py-config-editor" style="display: none; border: 1px solid #ccc; padding: 10px;">
+      <div class="py-config-editor-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>py-config編集 (Only Pyodide)</span>
+        <button id="close-py-config-btn">閉じる</button>
+      </div>
+      <div id="py-config-editor-content">
+        <!-- ここにpy-configの内容を表示／編集 -->
+        <textarea id="py-config-textarea" style="width: 100%; height: 200px;"></textarea>
+      </div>
+    </div>
     <!-- フッター -->
     <div class="footer">
       <div class="footer-left">
         <button class="save-btn" id="save-btn">保存</button>
         <button class="discard-btn" id="discard-btn">破棄</button>
         <button class="return-btn" id="return-btn">プラグインへ戻る</button>
+        
+        <button class="edit-pyconfig-btn" id="edit-py-config-btn" style="display: none;">py-configを編集</button>
         <label for="Checkbox" style="color: white; display: none;">
           <input type="checkbox" id="checkbox" checked>
           運用環境に反映する
@@ -37,7 +57,8 @@
         <div class="info-popup">
           <div>リンク</div>
           <a href="https://developer.cybozu.io/hc/ja" target="_blank" rel="noopener noreferrer">Cybozu developer network</a><br>
-          <a href="https://developer.cybozu.io/hc/ja/articles/202738940" target="_blank" rel="noopener noreferrer">kintone API 一覧</a>
+          <a href="https://developer.cybozu.io/hc/ja/articles/202738940" target="_blank" rel="noopener noreferrer">kintone API 一覧</a><br>
+          <a href="https://github.com/kasys1422/py-edit-for-kintone" target="_blank" rel="noopener noreferrer">GitHub (py-edit-for-kintone)</a><br>
         </div>
       </div>
     </div>
