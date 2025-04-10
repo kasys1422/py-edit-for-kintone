@@ -1,6 +1,6 @@
 # PyEdit for kintone
 
-**PyEdit for kintone** は、Kintoneを **Python（PyScript / MicroPython）で柔軟かつ直感的にカスタマイズできる**拡張機能です。[JSEdit for Kintone](https://cybozu.dev/ja/kintone/tips/development/plugins/sample-plugin/jsedit-for-kintone-plugin/)のように**プラグインベースでエディタを組み込み**、ブラウザ上で即座にスクリプトを書いて実行・反映できる環境を提供します。
+**PyEdit for kintone** は、Kintoneを **Python（PyScript / MicroPython）で柔軟かつ直感的にカスタマイズできる**拡張機能です。[JSEdit for kintone](https://cybozu.dev/ja/kintone/tips/development/plugins/sample-plugin/jsedit-for-kintone-plugin/)のように**プラグインベースでエディタを組み込み**、ブラウザ上で即座にスクリプトを書いて実行・反映できる環境を提供します。
 
 ![PyEdit for kintone](./img/screenshot.avif)
 
