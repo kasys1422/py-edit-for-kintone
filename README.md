@@ -1,12 +1,12 @@
-# PyEdit for Kintone
+# PyEdit for kintone
 
-**PyEdit for Kintone** は、Kintoneを **Python（PyScript / MicroPython）で柔軟かつ直感的にカスタマイズできる**拡張機能です。[JSEdit for Kintone](https://cybozu.dev/ja/kintone/tips/development/plugins/sample-plugin/jsedit-for-kintone-plugin/)のように**プラグインベースでエディタを組み込み**、ブラウザ上で即座にスクリプトを書いて実行・反映できる環境を提供します。
+**PyEdit for kintone** は、Kintoneを **Python（PyScript / MicroPython）で柔軟かつ直感的にカスタマイズできる**拡張機能です。[JSEdit for kintone](https://cybozu.dev/ja/kintone/tips/development/plugins/sample-plugin/jsedit-for-kintone-plugin/)のように**プラグインベースでエディタを組み込み**、ブラウザ上で即座にスクリプトを書いて実行・反映できる環境を提供します。
 
-![PyEdit for Kintone](./img/screenshot.avif)
+![PyEdit for kintone](./img/screenshot.avif)
 
 ## 特長
 
-- Kintoneのカスタマイズを**Pythonだけで実現**
+- kintoneのカスタマイズを**Pythonだけで実現**
 - イベント処理・API呼び出し・レコード更新などを**Pythonで簡潔に記述**
 - プラグイン内蔵のエディタで**試行錯誤がしやすい**
 - Pyscript + MicroPython を採用し、**非常に軽量・高速な動作**
@@ -21,7 +21,7 @@
 1. プラグインファイル（ZIP）をkintoneにインストール
 2. 使用したいアプリの設定画面から拡張機能を有効化
 3. PyEditのエディタ上にPythonコードを記入
-4. 保存して、Kintoneの画面をリロード
+4. 保存して、kintoneの画面をリロード
 5. イベントに応じてPythonコードが実行される
 
 ## ドキュメント
