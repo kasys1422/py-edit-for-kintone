@@ -134,6 +134,10 @@
     userCode = userCode.replace(/\\t/g, '\\t');
     // `を\\`に変換
     userCode = userCode.replace(/`/g, "\\\`");
+    // タグをエスケープ
+    userCode = userCode.replace(/</g, "&lt;");
+    userCode = userCode.replace(/>/g, "&gt;");
+    
 
     let pythonCode = `
 
@@ -259,7 +263,10 @@ def print(*args, sep=" ", end="", start="", level="info", color=None):
 
   # 引数が一つだけの場合は、console.log を優先して使用
   if len(args) == 1 and level == "info" and color is None and start == "" and end == "":
-      console.log(args[0])
+      if isinstance(args[0], (list, dict, tuple)):
+          console.log(str(args[0]))
+      else:
+          console.log(args[0])
       return
   
   if start != "" and end != "":
@@ -268,6 +275,7 @@ def print(*args, sep=" ", end="", start="", level="info", color=None):
     args = [start] + list(args)
   elif end != "":
     args = list(args) + [end]
+
 
   # 直接色指定がある場合は、その色でスタイル付き出力を実施
   if color is not None:
@@ -567,6 +575,57 @@ class handle_promise:
             self.promise_object.then(self.successCallback)
         else:
             self.promise_object.then(self.successCallback).catch(self.failureCallback)
+
+class FilterFunction:
+    def __init__(self, func, description=None, depth=1):
+        self.func = func
+        self.description = description or func.__name__
+        self._depth = depth
+
+    def __call__(self, seq):
+        return list(filter(self.func, seq))
+
+    def __or__(self, other):
+        return FilterFunction(
+            lambda x: self.func(x) or other.func(x),
+            '(%s OR %s)' % (self.describe(), other.describe()),
+            self._depth + other._depth
+        )
+
+    def __and__(self, other):
+        return FilterFunction(
+            lambda x: self.func(x) and other.func(x),
+            '(%s AND %s)' % (self.describe(), other.describe()),
+            self._depth + other._depth
+        )
+
+    def __invert__(self):
+        return FilterFunction(
+            lambda x: not self.func(x),
+            '(NOT %s)' % self.describe(),
+            self._depth
+        )
+
+    def or_(self, other):
+        return self.__or__(other)
+    def and_(self, other):
+        return self.__and__(other)
+    def not_(self):
+        return self.__invert__()
+
+    def describe(self):
+        return self.description
+    def chain_length(self):
+        return self._depth
+
+    def __str__(self):
+        return '<FilterFunction: %s>' % self.description
+    def __repr__(self):
+        return self.__str__()
+
+def filter_function(func):
+    return FilterFunction(func)
+
 \`;
 
     // ユーザーが記述するPythonコード
@@ -667,6 +726,10 @@ class handle_promise:
         userCode = userCode.replace(/\\\\t/g, '\\t');
         // \`を`に変換
         userCode = userCode.replace(/\\\`/g, '`');
+        // &lt;を<に変換
+        userCode = userCode.replace(/&lt;/g, "<");
+        // &gt;を>に変換
+        userCode = userCode.replace(/&gt;/g, ">");
 
 
         console.log('userCode:', userCode);
