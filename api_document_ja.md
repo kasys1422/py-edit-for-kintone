@@ -13,6 +13,7 @@
 - [kintone_record クラス](#kintone_record-クラス)
 - [on_event デコレータ](#on_event-デコレータ)
 - [getElementByFieldCode 関数](#getElementByFieldCode-関数)
+- [filter_function デコレータ](#filter_function-デコレータ)
 
 ---
 
@@ -287,3 +288,115 @@ if customerElement:
 else:
   print("指定されたフィールドコードに対応する要素が見つかりません。", level="warn")
 ```
+
+---
+
+## filter_function デコレータ
+
+**シグネチャ:**
+```python
+def filter_function(func):
+```
+
+**概要:**
+- リストやその他のイテラブルに対してフィルタリングを行うためのデコレータです。
+- 装飾された関数は、与えられた条件に従って各要素を評価し、条件を満たす要素のみを返すフィルタ関数に変換されます。
+- フィルタ関数は、論理演算子（`&`、`|`、`~`）およびメソッドチェーン（`.and_()`, `.or_()`, `.not_()`）を用いて複雑なフィルタ条件を簡単に合成できるよう設計されています。
+- また、`.describe()` や `.chain_length()` を使用することで、合成されたフィルタの構造やチェーンの深さを確認することができます。
+
+**パラメータ:**
+- `func`: 判定関数。各要素を引数に取り、その要素が条件を満たす場合は `True`、満たさない場合は `False` を返す関数です。
+
+**返り値:**
+- `FilterFunction` オブジェクト  
+  → フィルタ関数として機能し、後からリストやイテラブルに適用可能なオブジェクトになります。
+
+**使用例:**
+```python
+# フィルタ関数としての定義
+@filter_function
+def is_even(x):
+    """偶数かどうかを判定する"""
+    return x % 2 == 0
+
+@filter_function
+def is_positive(x):
+    """正の数かどうかを判定する"""
+    return x > 0
+
+@filter_function
+def less_than_five(x):
+    """5未満かどうかを判定する"""
+    return x < 5
+
+# フィルタ関数を使った例
+# 例1: 偶数のフィルタを適用
+even_numbers = is_even([1, 2, 3, 4, 5])
+print(even_numbers)  # 出力例: [2, 4]
+
+
+# 例2: 複合条件のフィルタをメソッドチェーンで作成
+# 「(偶数 AND 正) OR (NOT 正)」という複合条件のフィルタを作成
+combined_filter1 = is_even.and_(is_positive).or_(is_positive.not_())
+
+# データに対してフィルタを適用
+data = [1, 2, -2, 0, 3]
+result = combined_filter1(data)
+print(result)  # 出力例: [2, -2, 0]
+
+# フィルタの構造を確認
+print(combined_filter1.describe())       # 出力："((is_even AND is_positive) OR (NOT is_positive))"
+
+
+# 例3: 複合条件のフィルタを論理演算子を使って作成
+# 括弧を使って「偶数 または（正かつ5未満）」という複合条件を定義
+combined_filter2 = is_even | (is_positive & less_than_five)
+
+# データに対してフィルタを適用
+data = [-3, -2, 0, 1, 2, 3, 4, 5, 6]
+result = combined_filter2(data)
+print(result)  # 出力例: [-2, 0, 1, 2, 3, 4, 6]
+
+# 構造と深さを確認
+print(combined_filter2.describe())       # 出力："(is_even OR (is_positive AND less_than_five))"
+
+
+# 例4: 辞書の入ったリストに対するフィルタ
+# サンプルデータ
+records_data = {
+    "records": [
+        {"record_id": "1", "name": "Alice",   "age": 25, "score": 85},
+        {"record_id": "2", "name": "Bob",     "age": 30, "score": 75},
+        {"record_id": "3", "name": "Charlie", "age": 22, "score": 90},
+        {"record_id": "4", "name": "Diana",   "age": 28, "score": 95},
+        {"record_id": "5", "name": "Eve",     "age": 20, "score": 60}
+    ]
+}
+
+# フィルタ関数の定義
+@filter_function
+def is_adult(record):
+    """レコードが成人（20歳以上）かどうかを判定します"""
+    return record["age"] >= 20
+
+@filter_function
+def has_high_score(record):
+    """レコードのスコアが高い（90点以上）かどうかを判定します"""
+    return record["score"] >= 90
+
+# 論理演算子を使って複合条件を合成
+# 今回は「成人 OR 高スコア」のレコードを抽出する条件
+combined_filter3 = is_adult | has_high_score
+
+# フィルタを適用
+filtered_records = combined_filter3(records_data["records"])
+
+# 結果表示
+print(f"フィルタ結果:{str(combined_filter3)}")
+```
+
+**補足:**
+- `.and_(other)` や `.or_(other)` を使ったメソッドチェーンにより、複数のフィルタ関数を論理積や論理和で組み合わせることができます。
+- `~` 演算子または `.not_()` を使用することで、元のフィルタ条件の否定を容易に定義できます。
+- 結果として返されるリストは、元データの各要素に対してフィルタ条件が適用されたものとなります。  
+
