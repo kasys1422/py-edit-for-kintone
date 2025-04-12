@@ -313,7 +313,7 @@ def filter_function(func):
 
 **使用例:**
 ```python
-# フィルタ関数としての定義
+# フィルタ関数の定義
 @filter_function
 def is_even(x):
     """偶数かどうかを判定する"""
@@ -366,10 +366,10 @@ print(combined_filter2.describe())       # 出力："(is_even OR (is_positive AN
 records_data = {
     "records": [
         {"record_id": "1", "name": "Alice",   "age": 25, "score": 85},
-        {"record_id": "2", "name": "Bob",     "age": 30, "score": 75},
+        {"record_id": "2", "name": "Bob",     "age": 17, "score": 75},
         {"record_id": "3", "name": "Charlie", "age": 22, "score": 90},
         {"record_id": "4", "name": "Diana",   "age": 28, "score": 95},
-        {"record_id": "5", "name": "Eve",     "age": 20, "score": 60}
+        {"record_id": "5", "name": "Eve",     "age": 18, "score": 60}
     ]
 }
 
