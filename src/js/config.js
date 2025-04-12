@@ -619,7 +619,7 @@ class FilterFunction:
         return self._depth
 
     def __str__(self):
-        return '<FilterFunction: %s>' % self.description
+        return '&lt;FilterFunction: %s&gt;' % self.description
     def __repr__(self):
         return self.__str__()
 
