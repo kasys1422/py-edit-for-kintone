@@ -119,9 +119,10 @@
       // JSONを1行の文字列に変換
       configCode = JSON.stringify(JSON.parse(configCode));
     } catch (e) {
-      alert('py-configの内容が不正です。');
-      hideLoading();
-      return;
+      // alert('py-configの内容が不正です。');
+      // hideLoading();
+      // return;
+      configCode = "{}";
     }
 
     let userCode = editor.getValue();
@@ -187,17 +188,18 @@ function getElementByFieldCode(fieldCode) {
 //document.getElementByFieldCode = getElementByFieldCode;
 
 
+
     (function() {
 "use strict";
 
-kintone.events.on([
-        'app.record.detail.show',
-        'app.record.create.show',
-        'app.record.edit.show'
-], function(event) {
-    console.log(event);
-    return event;
-});
+// kintone.events.on([
+//         'app.record.detail.show',
+//         'app.record.create.show',
+//         'app.record.edit.show'
+// ], function(event) {
+//     console.log(event);
+//     return event;
+// });
 
 // 外部リソースのURLを定数で定義
 const PY_SCRIPT_CSS_URL = "https://pyscript.net/releases/2025.3.1/core.css";
