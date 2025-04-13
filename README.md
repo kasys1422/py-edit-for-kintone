@@ -57,13 +57,13 @@ kintoneのREST APIや外部APIを簡単に呼び出すユーティリティで�
 params = {"app": 123, "id": 456}
 
 # デコレータとコールバック関数を記述し、APIコールを即時実行
-@kintone_api("/k/v1/record", "GET", params)
+@kintone_api(kintone["api"]["url"]("/k/v1/records", True), "GET", params)
 def on_success(result):
     print(result)
 
 
 # 使い方2：エラー時のコールバックも含めて詳細に記述
-api_caller = kintone_api("/k/v1/record", "GET", params)
+api_caller = kintone_api(kintone["api"]["url"]("/k/v1/records", True), "GET", params)
 
 # デコレータでコールバックを定義
 @api_caller.on_success

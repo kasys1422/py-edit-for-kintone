@@ -160,12 +160,12 @@ def __init__(self, api_endpoint: str, method: str, params: dict,
 **使用例:**
 ```python
 # 例1: デコレータで成功時のコールバックのみを指定して API を呼び出す 
-@kintone_api("/k/v1/records.json", "GET", {"app": 123})
+@kintone_api(kintone["api"]["url"]("/k/v1/records", True), "GET", {"app": 123})
 def handle_api_response(response):
     print("API Response:", response)
 
 # 例2: 成功時と失敗時のコールバックを指定して API を呼び出す
-event_caller = kintone_api("/k/v1/records.json", "GET", {"app": 123})
+event_caller = @kintone_api(kintone["api"]["url"]("/k/v1/records", True), "GET", {"app": 123})
 
 @event_caller.on_success
 def handle_success(response):
@@ -184,7 +184,7 @@ def handle_api_response(response):
 def handle_api_error(error):
     print("API Error:", error)
 
-api_caller = kintone_api("/k/v1/records.json", "GET", {"app": 123}, handle_api_response, handle_api_error)
+api_caller = kintone_api(kintone["api"]["url"]("/k/v1/records", True), "GET", {"app": 123}, handle_api_response, handle_api_error)
 api_caller.call()
 ```
 
@@ -223,7 +223,7 @@ def on_edit_success(event):
 @kintone_event("app.record.create.show")
 def on_create_show(event):
     # API を呼び出す
-    @kintone_api("/k/v1/records.json", "GET", {"app": 123})
+    @kintone_api(kintone["api"]["url"]("/k/v1/records", True),  "GET", {"app": 123})
     def handle_api_response(response):
         # API レスポンスを処理する
         print("API Response:", response)
